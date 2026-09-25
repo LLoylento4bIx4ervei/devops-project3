@@ -1,0 +1,33 @@
+---
+- name: Installing Docker on a VM
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Update the apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+
+    - name: Add user into group docker
+      user:
+        name: stas
+        groups: docker
+        append: yes
+
+    - name: Verify that Docker is running
+      command: docker --version
+      register: docker_version
+      changed_when: false
+
+    - name: Docker version
+      debug:
+        msg: "Install: {{ docker_version.stdout }}"
