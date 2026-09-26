@@ -1,0 +1,50 @@
+---
+
+- name: Deploy application to /opt/project2
+  hosts: localhost
+  become: yes
+  vars:
+    project2_src: /home/stas/projects/devops-project2
+    project2_dest: /opt/project2 
+
+
+  tasks:
+    - name: Install python3-docker
+      apt:
+        name: python3-docker
+        state: present 
+
+    - name: Create project directory
+      file:
+        path: "{{ project2_dest }}" 
+        state: directory
+        owner: stas
+        group: stas
+        mode: '0755'
+
+    - name: Copy application files
+      copy:
+        src: "{{ project2_src }}/{{ item }}"
+        dest: "{{ project2_dest }}/{{ item }}"
+        owner: stas
+        group: stas
+        mode: '0644'
+      loop:
+        - app.py
+        - requirements.txt
+        - Dockerfile
+        - docker-compose.yml
+        - nginx.conf
+
+    - name: Run docker compose
+      docker_compose:
+        project_src: "{{ project2_dest }}"
+        state: present
+        restarted: yes
+        build: yes
+      register: compose_result
+
+
+    - name: Show compose status
+      debug:
+        var: compose_result    
