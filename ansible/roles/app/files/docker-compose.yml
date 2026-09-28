@@ -1,0 +1,37 @@
+version: '3.3'
+
+services:
+ db:
+  image: postgres:15-alpine
+  environment:
+   POSTGRES_DB: counter_db
+   POSTGRES_USER: postgres
+   POSTGRES_PASSWORD: secret
+  volumes:
+   - pgdata:/var/lib/postgresql/data
+  restart: always
+
+ app:
+  build: .
+  depends_on:
+   - db
+  environment:
+   DB_HOST: db
+   DB_NAME: counter_db
+   DB_USER: postgres
+   DB_PASS: secret
+  restart: always
+
+
+ nginx:
+  image: nginx:alpine
+  ports: 
+   - "80:80"
+  volumes: 
+   - ./nginx.conf:/etc/nginx/conf.d/default.conf
+  depends_on:
+   - app
+  restart: always 
+  
+volumes:
+ pgdata:

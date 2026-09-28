@@ -1,0 +1,40 @@
+---
+- name: Install python3-docker
+  apt:
+    name: python3-docker
+    state: present
+
+- name: Create project directory
+  file:
+    path: "{{ app_dest }}"
+    state: directory
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: '0755'
+
+- name: Copy application files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ app_dest }}/{{ item }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: '0644' 
+  loop:
+    - app.py
+    - requirements.txt
+    - Dockerfile
+    - docker-compose.yml
+    - nginx.conf
+
+- name: Run docker compose
+  docker_compose:
+    project_src: "{{ app_dest }}"
+    state: present
+    restarted: yes
+    build: yes
+  register: compose_result
+
+- name: Show compose status
+  debug: 
+    var: compose_result  
+
