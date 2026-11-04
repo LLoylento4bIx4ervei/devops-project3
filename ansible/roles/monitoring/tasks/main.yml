@@ -1,0 +1,30 @@
+---
+
+- name: Create monitoring directory
+  file:
+    path: "{{ monitoring_dest }}"
+    state: directory
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"		 
+    mode: '0755'
+
+- name: Copy monitoring config files
+  copy: 
+    src: "{{ item }}"
+    dest: "{{ monitoring_dest}}/{{ item }}"
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_id }}"
+    mode: '0644'
+  loop:
+    - docker-compose.yml
+    - prometheus.yml
+
+- name: Run monitoring stack
+  shell: docker-compose up -d
+  args:
+    chdir: "{{ monitoring_dest }}"
+  register: monitoring_result
+
+- name: Show monitoring status
+  debug:
+    var: monitoring_result 

@@ -1,7 +1,8 @@
 ---
-- name: Configure Docker and deploy app
+- name: Configure Docker and deploy app and monitoring
   hosts: localhost
   become: yes
   roles:
     - docker
     - app
+    - monitoring
